@@ -3,6 +3,7 @@ import { CustomError } from "../../domain/errors/custom.error";
 import { ProductServices } from "../services/product.service";
 import { PaginationDto } from "../../domain/dtos/pagination.dto";
 import { CreateProductDto } from "../../domain/dtos/create-product.dto";
+import { UpdateProductDto } from "../../domain/dtos/update-product.dto";
 
 export class ProductController {
   constructor(private readonly productService: ProductServices) {}
@@ -15,14 +16,14 @@ export class ProductController {
     }
     return res.status(500).json({ error: `internal server error ${error}` });
   }
-  createProduct =  (req: Request, res: Response) => {
+  createProduct = (req: Request, res: Response) => {
     const [error, createProductDto] = CreateProductDto.create(req.body);
     if (error) res.status(400).json({ error });
 
     this.productService
       .createProduct(createProductDto!, req.body.user)
-      .then(async(product) => {
-        res.status(201).json(product)
+      .then(async (product) => {
+        res.status(201).json(product);
       })
       .catch((error) => this.handleError(error, res));
   };
@@ -31,10 +32,31 @@ export class ProductController {
     const { page = 1, limit = 5 } = req.query;
     const [error, paginationDto] = PaginationDto.create(+page, +limit);
     if (error) res.status(400).json({ error });
-
+   
     this.productService
       .getProducts(paginationDto!)
       .then((products) => res.status(200).json(products))
       .catch((error) => this.handleError(error, res));
-  }
+  };
+
+  getProduct = async (req: Request, res: Response) => {
+    this.productService
+      .getProduct(req.params.id)
+      .then((product) => res.status(200).json(product))
+      .catch((error) => this.handleError(error, res));
+  };
+
+  updateProduct = async (req: Request, res: Response) => {
+    const object = {
+      id: req.params.id,
+      ...req.body,
+    };
+
+    const [error, updateProduct] = UpdateProductDto.create(object);
+    if (error) res.status(400).json({ error });
+    this.productService
+      .updateProduct(updateProduct!)
+      .then((product) => res.status(200).json(product))
+      .catch((error) => this.handleError(error, res));
+  };
 }

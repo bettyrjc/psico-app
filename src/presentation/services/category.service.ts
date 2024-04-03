@@ -57,6 +57,7 @@ export class CategoryServices {
           id: category.id,
           name: category.name,
           available: category.available,
+          role: category.role,
         })),
       };
     } catch (error) {
