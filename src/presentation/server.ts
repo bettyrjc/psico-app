@@ -1,5 +1,7 @@
 import path from 'path';
 import express, { Router } from 'express';
+import swaggerUI from 'swagger-ui-express';
+import swaggerSpec from '../../swagger';
 interface Options {
   port: number;
   routes: Router;
@@ -28,17 +30,15 @@ export class Server {
     
 
     //* Middlewares
-    this.app.use( express.json() ); // raw
-    this.app.use( express.urlencoded({ extended: true }) ); // x-www-form-urlencoded
-
     //* Public Folder
-    this.app.use( express.static( this.publicPath ) );
-
+    this.app.use(express.static(this.publicPath));
+    this.app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerSpec));
+    
     //* Routes
-    this.app.use( this.routes );
+    this.app.use(this.routes);
 
-    this.app.get(/^\/(?!api).*/ , (req, res) => {
-      const indexPath = path.join( __dirname + `../../../${ this.publicPath }/index.html` );
+    this.app.get(/^\/(?!api).*/, (req, res) => {
+      const indexPath = path.join(__dirname + `../../../${this.publicPath}/index.html`);
       res.sendFile(indexPath);
     });
     
